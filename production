@@ -1,3 +1,5 @@
-[office-dockerhosts]
+[dockerhosts]
 raven
 
+[workstations]
+basil

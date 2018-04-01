@@ -3,4 +3,7 @@
 - hosts: all
   roles:
     - common
+
+- hosts: dockerhosts
+  roles:
     - dockerhost

@@ -1,0 +1,7 @@
+---
+
+- hosts: workstations
+  roles:
+    - python_env
+    - i3_gaps
+    
