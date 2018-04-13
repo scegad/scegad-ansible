@@ -4,4 +4,4 @@
   roles:
     - python_env
     - i3_gaps
-    
+    - { role: laptop, when: hw_type == 'laptop' }
