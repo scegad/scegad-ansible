@@ -5,3 +5,5 @@ laptop_packages:
   - acpi-call-dkms
   - tp-smapi-dkms
   - powertop
+  - bluez-tools
+
