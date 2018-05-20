@@ -25,8 +25,8 @@
 - name: Add cron job for offline playbook run
   cron:
     name: Apply offline Ansible playbook
-    minute: 0
-    hour: */4
+    minute: "0'
+    hour: "*/4"
     user: {{ ansible_user }}
     job: "{{ ansible_offline_root }}/ansible/bin/deploy_offline.sh"
   state: present 
