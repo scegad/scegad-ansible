@@ -22,3 +22,12 @@
     virtualenv: "{{ ansible_offline_root }}/venv"
     virtualenv_command: "{{ python_install_root }}/3/bin/python3 -m virtualenv"
 
+- name: Add cron job for offline playbook run
+  cron:
+    name: Apply offline Ansible playbook
+    minute: 0
+    hour: */4
+    user: {{ ansible_user }}
+    job: "{{ ansible_offline_root }}/ansible/bin/deploy_offline.sh"
+  state: present 
+
