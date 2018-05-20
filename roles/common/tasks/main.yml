@@ -1,0 +1,8 @@
+---
+# roles/common/tasks/main.yml
+
+- name: be sure ntp is installed
+  apt: name=ntp state=present
+  become: true
+  tags: ntp
+

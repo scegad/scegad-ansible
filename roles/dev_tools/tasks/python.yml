@@ -1,0 +1,90 @@
+---
+
+- name: Install Python build dependencies
+  package: "name={{ item }} state=present"
+  with_items: "{{ python_build_dependencies }}"
+  become: true
+
+- name: Create python source root
+  file:
+    path: "{{ python_source_root }}"
+    state: directory
+    mode: 0755
+    owner: "{{ ansible_user }}"
+  become: true
+
+- name: Check for existing Python source packages
+  stat: path="{{ python_source_root }}/{{ item.filename }}"
+  with_items: "{{ installed_python_versions }}"
+  register: python_source_packages_stat
+
+- name: Download Python source packages
+  get_url:
+    url: "https://www.python.org/ftp/python/{{ item.item.version }}/{{ item.item.filename }}"
+    dest: "{{ python_source_root }}/{{ item.item.filename }}"
+    mode: 0640
+  with_items: "{{ python_source_packages_stat.results }}"
+  when: not item.stat.exists
+
+- name: Check for existing Python source directories
+  stat: path="{{ python_source_root }}/Python-{{ item.version }}"
+  with_items: "{{ installed_python_versions }}"
+  register: python_source_directories_stat
+
+- name: Extract Python source archives
+  unarchive:
+    src: "{{ python_source_root }}/{{ item.filename }}"
+    dest: "{{ python_source_root }}"
+    creates: "{{ python_source_root }}/Python-{{ item.version }}"
+    remote_src: yes
+  with_items: "{{ installed_python_versions }}"
+
+- name: Configure Python source tree
+  command: >
+    ./configure prefix={{ python_install_root }}/{{ item.item.version }}
+    chdir="{{ python_source_root }}/Python-{{ item.item.version }}"
+  with_items: "{{ python_source_directories_stat.results }}"
+  when: not item.stat.exists
+
+- name: Build Python from source
+  command: >
+    make
+    chdir="{{ python_source_root }}/Python-{{ item.item.version }}"
+  with_items: "{{ python_source_directories_stat.results }}"
+  when: not item.stat.exists
+  become: true
+
+- name: Install Python build
+  command: >
+    make install
+    chdir="{{ python_source_root }}/Python-{{ item.item.version }}"
+  with_items: "{{ python_source_directories_stat.results }}"
+  when: not item.stat.exists
+  become: true
+
+- name: Create default Python 3 directory symlink
+  file:
+    src: "{{ python_install_root }}/{{ default_python3_version }}"
+    dest: "{{ python_install_root }}/3"
+    state: link
+  become: true
+
+- name: Create default Python 2 directory symlink
+  file:
+    src: "{{ python_install_root }}/{{ default_python2_version }}"
+    dest: "{{ python_install_root }}/2"
+    state: link
+  become: true
+
+- name: Install global PIP configuration
+  copy:
+    src: "{{ role_path }}/files/pip.conf"
+    dest: /etc/pip.conf
+  become: true
+
+- name: Install virtualenv globally (Python 3)
+  command: >
+    {{ python_install_root }}/{{ item.version }}/bin/pip3 install virtualenv
+  with_items: "{{ python_source_directories_stat.results }}"
+  when: not item.stat.exists and item.item.version.split(".")[0] == "3"
+  become: true

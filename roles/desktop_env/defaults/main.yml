@@ -1,0 +1,33 @@
+---
+
+i3gaps_build_root: /usr/local/src/i3-gaps
+i3gaps_install_root: /usr/local/i3-gaps
+
+i3gaps_build_dependencies:
+  - asciidoc
+  - autoconf
+  - j4-dmenu-desktop
+  - libasound2-dev
+  - libcap2-bin
+  - libconfuse-dev
+  - libev-dev
+  - libiw-dev
+  - libpulse-dev
+  - libnl-genl-3-dev
+  - libpango1.0-dev
+  - libstartup-notification0-dev
+  - libtool
+  - libtool-bin
+  - libxcb-cursor-dev 
+  - libxcb-icccm4-dev
+  - libxcb-keysyms1-dev
+  - libxcb-randr0-dev
+  - libxcb-util0-dev
+  - libxcb-xinerama0-dev 
+  - libxcb-xkb-dev
+  - libxcb1-dev
+  - libxkbcommon-dev
+  - libxkbcommon-x11-dev
+  - libyajl-dev
+  - suckless-tools
+  - xutils-dev

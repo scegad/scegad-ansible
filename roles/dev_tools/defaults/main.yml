@@ -1,0 +1,25 @@
+python_source_root: "/usr/local/src/python"
+python_install_root: "/usr/local/python"
+
+installed_python_versions:
+  - { filename: 'Python-3.6.4.tgz', version: '3.6.4' }
+  - { filename: 'Python-2.7.14.tgz', version: '2.7.14' }
+
+default_python3_version: '3.6.4'
+default_python2_version: '2.7.14'
+
+python_build_dependencies:
+  - build-essential
+  - curl
+  - libbz2-dev
+  - libncurses5-dev
+  - libncursesw5-dev
+  - libreadline-dev
+  - libsqlite3-dev
+  - libssl-dev
+  - llvm
+  - make
+  - tk-dev
+  - wget
+  - xz-utils
+  - zlib1g-dev

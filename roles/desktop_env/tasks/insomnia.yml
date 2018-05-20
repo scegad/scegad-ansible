@@ -1,0 +1,23 @@
+---
+
+- name: Add Insomnia Apt repo key
+  apt_key:
+    url: https://insomnia.rest/keys/debian-public.key.asc
+    state: present
+  become: true
+
+- name: Add Insomnia Apt repo
+  apt_repository:
+    repo: deb https://dl.bintray.com/getinsomnia/Insomnia /
+    state: present
+    filename: insomnia
+    update_cache: yes
+  become: true
+
+- name: Install Insomnia package
+  apt:
+    name: insomnia
+    state: latest
+    update_cache: yes
+  become: true
+    

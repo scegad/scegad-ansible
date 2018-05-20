@@ -1,0 +1,8 @@
+---
+
+- name: Install i3-gaps tiling wm
+  import_tasks: i3_gaps.yml
+
+- name: Install Insomnia REST client
+  import_tasks: insomnia.yml
+

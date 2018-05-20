@@ -1,0 +1,4 @@
+[Desktop Entry]
+Name=i3
+Comment=This session logs you in with i3
+Exec=/usr/local/i3-gaps/i3-gaps/bin/i3

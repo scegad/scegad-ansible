@@ -1,0 +1,16 @@
+---
+# roles/qemu-libvirt/tasks/main.yml
+
+- name: Install qemu-kvm and related
+  apt: name={{ item }} state=present
+  become: true
+  tags: qemu
+  with_items:
+    - qemu-kvm
+    - qemu-utils
+    - qemu-efi
+    - ovmf
+    - libvirt-bin
+    - libvirt-dev
+    - libvirt0
+

@@ -1,0 +1,33 @@
+---
+# roles/ansible_init/tasks/main.yml
+
+- name: Add group
+  group:
+    name: "{{ ansible_user }}"
+  become: true
+
+- name: Add Ansible user
+  user:
+    name: "{{ ansible_user }}"
+    groups: "{{ ansible_user }}"
+    password: ""
+    shell: "/bin/bash"
+    append: yes
+    comment: "Ansible user"
+    state: present
+  become: true
+
+- name: add default ssh key for ansible user
+  authorized_key:
+    user: "{{ ansible_user }}"
+    key: "{{ lookup('file', '{{ ansible_ssh_public_key_file }}') }}"
+    state: present
+  become: true
+
+- name: nopasswd sudo for ansible user
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^{{ ansible_user }}'
+    line: '{{ ansible_user }} ALL=(ALL) NOPASSWD: ALL'
+  become: true

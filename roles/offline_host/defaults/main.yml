@@ -1,0 +1,4 @@
+---
+
+ansible_offline_root: /opt/ansible/offline
+

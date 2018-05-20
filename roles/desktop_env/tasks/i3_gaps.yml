@@ -1,0 +1,155 @@
+---
+
+- name: Install i3-gaps dependencies
+  package: "name={{ item }} state=present"
+  with_items: "{{ i3gaps_build_dependencies }}"
+  become: true
+
+- name: Create ansible-i3-gaps build root
+  file:
+    path: "{{ i3gaps_build_root }}"
+    state: directory
+    mode: 0755
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  become: true
+  register: create_i3_gaps_build_root_result
+
+- name: Create i3-gaps install root
+  file:
+    path: "{{ i3gaps_install_root }}"
+    state: directory
+    mode: 0755
+  become: true
+
+- name: Clone xcb-util-xrm source
+  git:
+    repo: https://github.com/Airblader/xcb-util-xrm
+    dest: "{{ i3gaps_build_root }}/xcb-util-xrm"
+    version: master
+    recursive: yes
+
+- name: Configure xcb-util-xrm source tree
+  command: >
+    ./autogen.sh --prefix={{ i3gaps_install_root }}/xcb-util-xrm
+    chdir="{{ i3gaps_build_root }}/xcb-util-xrm"
+  when: create_i3_gaps_build_root_result.changed
+
+- name: Build xcb-util-xrm
+  command: >
+    make
+    chdir="{{ i3gaps_build_root }}/xcb-util-xrm"
+  when: create_i3_gaps_build_root_result.changed
+
+- name: Install xcb-util-xrm build
+  command: >
+    make install
+    chdir="{{ i3gaps_build_root }}/xcb-util-xrm"
+  become: true
+  when: create_i3_gaps_build_root_result.changed
+
+- name: Create xcb-util-xrm shared library symlink
+  file:
+    src: "{{ i3gaps_install_root }}/xcb-util-xrm/lib/libxcb-xrm.so.0"
+    dest: "/usr/local/lib/libxcb-xrm.so.0"
+    state: link
+  become: true
+
+- name: Clone i3-gaps source
+  git:
+    repo: https://www.github.com/Airblader/i3
+    dest: "{{ i3gaps_build_root }}/i3-gaps"
+    version: gaps-next
+
+- name: Prepare to configure i3-gaps source tree
+  command: >
+    autoreconf --force --install
+    chdir="{{ i3gaps_build_root }}/i3-gaps"
+  when: create_i3_gaps_build_root_result.changed
+
+- name: Create i3-gaps build directory
+  file:
+    path: "{{ i3gaps_build_root }}/i3-gaps/build"
+    state: directory
+    mode: 0755
+
+- name: Configure i3-gaps source tree
+  command: >
+    ../configure --prefix={{ i3gaps_install_root }}/i3-gaps --sysconfdir=/etc --disable-sanitizers
+    chdir="{{ i3gaps_build_root }}/i3-gaps/build"
+  environment:
+    PKG_CONFIG_PATH: "{{ i3gaps_install_root }}/xcb-util-xrm/lib/pkgconfig"
+  when: create_i3_gaps_build_root_result.changed
+
+- name: Build i3-gaps
+  command: >
+    make
+    chdir="{{ i3gaps_build_root }}/i3-gaps/build"
+  when: create_i3_gaps_build_root_result.changed
+
+- name: Install i3-gaps build
+  command: >
+    make install
+    chdir="{{ i3gaps_build_root }}/i3-gaps/build"
+  become: true
+  when: create_i3_gaps_build_root_result.changed
+
+- name: List i3 bin files
+  command: >
+    ls -1
+    chdir="{{ i3gaps_install_root }}/i3-gaps/bin"
+  register: i3_bin_files_ls
+  when: create_i3_gaps_build_root_result.changed
+
+- name: Show i3 bin file list
+  debug:
+    msg: "{{ i3_bin_files_ls }}"
+
+- name: Create symlinks for i3
+  file:
+    src: "{{ i3gaps_install_root }}/i3-gaps/bin/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    state: link
+  with_items: "{{ i3_bin_files_ls.stdout_lines }}"
+  become: true
+  when: create_i3_gaps_build_root_result.changed
+
+- name: Create i3 xsession entry
+  copy:
+    src: i3.desktop
+    dest: "/usr/share/xsessions/i3.desktop"
+    mode: 0644
+
+- name: Clone i3status source
+  git:
+    repo: https://github.com/i3/i3status.git
+    dest: "{{ i3gaps_build_root }}/i3status"
+    version: master
+  register: i3status_clone_result
+
+- name: Build i3status
+  command: >
+    make
+    chdir="{{ i3gaps_build_root }}/i3status"
+  when: i3status_clone_result.changed
+
+- name: Create i3status install directory
+  file:
+    path: "{{ i3gaps_install_root }}/i3status"
+    state: directory
+    mode: 0755
+
+- name: Install i3status bin
+  copy:
+    src: "{{ i3gaps_build_root }}/i3status/i3status"
+    dest: "{{ i3gaps_install_root }}/i3status/i3status"
+    mode: 0755
+    remote_src: yes
+
+- name: Create symlink for i3status
+  file:
+    src: "{{ i3gaps_install_root }}/i3status/i3status"
+    dest: "/usr/local/bin/i3status"
+    state: link
+  become: true
+  when: i3status_clone_result.changed

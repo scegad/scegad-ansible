@@ -1,0 +1,36 @@
+---
+
+- name: Install laptop dependencies
+  package: "name={{ item }} state=present"
+  with_items: "{{ laptop_packages }}"
+  become: true
+
+- name: Start tlp service
+  service:
+    name: tlp
+    state: started
+  become: true
+
+- name: Load acpi-call kernel module
+  modprobe:
+    name: acpi_call
+    state: present
+
+- name: Configure Intel video
+  copy:
+    src: 20-intel.conf
+    dest: /usr/share/X11/xorg.conf.d/20-intel.conf
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+
+- name: Configure Synaptics touchpad
+  copy:
+    src: 50-synaptics.conf
+    dest: /usr/share/X11/xorg.conf.d/50-synaptics.conf
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+

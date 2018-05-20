@@ -1,0 +1,30 @@
+---
+
+- name: Create ansible_offline root 
+  file:
+    path: "{{ ansible_offline_root }}"
+    state: directory
+    mode: 0755
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  become: true
+  register: create_ansible_root_result
+
+- name: Clone scegad-ansible-roles repo
+  git:
+    repo: https://github.com/scegad/scegad-ansible-roles
+    dest: "{{ ansible_offline_root }}/roles"
+    version: master
+
+- name: Clone scegad-ansible repo
+  git:
+    repo: https://github.com/scegad/scegad-ansible
+    dest: "{{ ansible_offline_root }}/ansible"
+    version: master
+
+- name: Create python virtualenv
+  pip:
+    requirements: "{{ ansible_offline_root }}/ansible/requirements.txt"
+    virtualenv: "{{ ansible_offline_root }}/venv"
+    virtualenv_command: "{{ python_install_root }}/3/bin/python3 -m virtualenv"
+

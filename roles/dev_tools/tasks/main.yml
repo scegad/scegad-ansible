@@ -1,0 +1,11 @@
+---
+
+- name: Install build-essential package group
+  apt:
+    name: build-essential
+    state: present
+  become: true
+
+- name: Set up Python
+  import_tasks: python.yml
+
