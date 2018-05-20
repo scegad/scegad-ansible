@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
+ANSIBLE_PATH="/opt/ansible/offline/ansible"
+APB="/opt/ansible/offline/venv/bin/ansible-playbook"
+
 # Execute playbook against local host
-pushd /opt/ansible/offline/ansible && \
-/opt/ansible/offline/venv/bin/ansible-playbook \
+pushd $ANSIBLE_PATH && \
+$APB \
   -i production \
   -l $HOSTNAME \
   -c local \
