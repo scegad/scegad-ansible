@@ -3,3 +3,7 @@ raven
 
 [workstations]
 basil hw_type=laptop hw_model=tp431s
+
+[online:children]
+dockerhosts
+

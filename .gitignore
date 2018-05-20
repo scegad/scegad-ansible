@@ -1,6 +1,9 @@
 # Ansible retry files
 *.retry
 
+# VIM swp files
+*.swp
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

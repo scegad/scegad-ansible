@@ -10,12 +10,6 @@
   become: true
   register: create_ansible_root_result
 
-- name: Clone scegad-ansible-roles repo
-  git:
-    repo: https://github.com/scegad/scegad-ansible-roles
-    dest: "{{ ansible_offline_root }}/roles"
-    version: master
-
 - name: Clone scegad-ansible repo
   git:
     repo: https://github.com/scegad/scegad-ansible

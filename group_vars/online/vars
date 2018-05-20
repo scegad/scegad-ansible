@@ -1,0 +1,4 @@
+---
+# file: group_vars/online/vars
+
+secret_thing: "{{ vault_secret_thing }}"
