@@ -4,8 +4,10 @@ i3gaps_build_root: /usr/local/src/i3-gaps
 i3gaps_install_root: /usr/local/i3-gaps
 
 i3gaps_build_dependencies:
+  - alsa-utils
   - asciidoc
   - autoconf
+  - compton
   - j4-dmenu-desktop
   - libasound2-dev
   - libcap2-bin
@@ -29,5 +31,6 @@ i3gaps_build_dependencies:
   - libxkbcommon-dev
   - libxkbcommon-x11-dev
   - libyajl-dev
+  - rxvt-unicode
   - suckless-tools
   - xutils-dev

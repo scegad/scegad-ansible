@@ -153,3 +153,10 @@
     state: link
   become: true
   when: i3status_clone_result.changed
+
+- name: Install pywal
+  pip:
+    name: pywal
+    executable: pip3
+  become: true
+

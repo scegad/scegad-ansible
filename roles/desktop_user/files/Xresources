@@ -1,0 +1,38 @@
+! Reload Xresources with:
+!  xrdb ~/.Xresources
+
+! do not scroll with output
+URxvt*scrollTtyOutput: false
+
+! scroll in relation to buffer (with mouse scroll or Shift+Page Up)
+URxvt*scrollWithBuffer: true
+
+! scroll back to the bottom on keypress
+URxvt*scrollTtyKeypress: true
+
+URxvt.secondaryScreen: 1
+URxvt.secondaryScroll: 0
+
+!URxvt.secondaryWheel: 1
+
+!URxvt.font: 9x15bold
+URxvt.font: 9x15
+
+URxvt.letterSpace: -1
+
+! borderless and no scrollbar
+URxvt*scrollBar_right: false
+URxvt*scrollBar: false
+URxvt*borderLess: false
+
+! teh transparency stuff
+URxvt*inheritPixmap: true
+URxvt*tintColor: white
+URxvt*shading: 30
+
+! Disable default C-Shift binding (gotta use C-Shift to get C-Plus)
+URxvt*iso14755: False 
+URxvt*iso14755_52: False
+
+! Dynamic font resizing courtesy of https://github.com/simmel/urxvt-resize-font
+!urxvt*perl-ext-common: default,tabbed,matcher,resize-font,-tabbed

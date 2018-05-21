@@ -1,0 +1,87 @@
+" +------------------+
+" | General Settings |
+" +------------------+
+
+set encoding=utf-8                        " UTF-8
+set number                                " Enable line numbers
+set syntax=on                             " Enable syntax highlighting
+
+" +-------------+
+" | Text Search |
+" +-------------+
+
+set hlsearch                              " Highlight search results
+set incsearch                             " Show search results as you type
+set ignorecase                            " Make search case-insensitive
+set smartcase                             " Make search case-sensitive if the search string has caps
+
+noremap <silent> <leader><cr> :noh<cr>    " <Leader><CR> clears search highlights
+
+" +----------------+
+" | Autocompletion |
+" +----------------+
+
+set path+=**                              " Enable recursive file search beneath current path
+set wildmenu                              " Enable wildmenu for visual autocompletion
+set wildignorecase                        " Make completion case-insensitive
+set wildmode=longest:list,full            " 1) Complete the longest match and show a list of all matches.
+                                          " 2) Show wildmenu with list of all matches.
+
+" +----------------+
+" | Tab management |
+" +----------------+
+
+nnoremap <Leader>1 1gt                    " Switch to tab 1
+nnoremap <Leader>2 2gt                    " Switch to tab 2
+nnoremap <Leader>3 3gt                    " Switch to tab 3
+nnoremap <Leader>4 4gt                    " Switch to tab 4
+nnoremap <Leader>5 5gt                    " Switch to tab 5
+nnoremap <Leader>6 6gt                    " Switch to tab 6
+nnoremap <Leader>7 7gt                    " Switch to tab 7
+nnoremap <Leader>8 8gt                    " Switch to tab 8
+nnoremap <Leader>9 9gt                    " Switch to tab 9
+
+noremap <Leader>tN :tabnew<CR>            " Create a new tab, with empty window and buffer.
+noremap <Leader>tc :tabclose<CR>          " Close current tab, leaving buffer open.
+noremap <Leader>tm :tabmove<CR>           " Move current tab.
+noremap <Leader>tn :tabnext<CR>           " Easily go to next tab. Normally: gt
+noremap <Leader>tp :tabprevious<CR>       " Easily go to previous tab. Normally: gT
+
+" +-------------------+
+" | Window management |
+" +-------------------+
+
+" :vsplit [filename]                      " Create a window (splitting vertically)
+" :split [filename]                       " Create a window (splitting horizontally)
+" <C-w>w                                  " Switch to the next window
+" <C-w>h                                  " Switch window (left)
+" <C-w>j                                  " Switch window (down)
+" <C-w>k                                  " Switch window (up)
+" <C-w>l                                  " Switch window (right)
+" :close                                  " Close a window (buffer remains open)
+
+" +-------------------+
+" | Buffer management |
+" +-------------------+
+
+" :edit <filename>                        " Opens file in new buffer 
+" :vnew                                   " Open a new, empty buffer in a new window (splitting vertically)
+" :new                                    " Open a new, empty buffer in a new window (splitting horizontally)
+" :bdelete <buffer_name|buffer_num>       " Deletes a buffer
+
+" +---------------------+
+" | Tab/indent settings |
+" +---------------------+
+
+set tabstop=2                             " Number of spaces to insert when <Tab> pressed in insert mode 
+set softtabstop=2                         " Number of spaces to back up when backspace pressed in insert mode
+set shiftwidth=2                          " Number of spaces to use when indenting/unindenting blocks
+set shiftround                            " When shifting, round to the nearest multiple of shiftwidth
+set expandtab                             " <Tab> inserts spaces instead of tabs
+
+" +---------------------------+
+" | Resources and inspiration |
+" +---------------------------+
+
+" https://medium.com/@hql287/10-vim-tips-to-ease-the-learning-curve-c8234cbdafa5
+

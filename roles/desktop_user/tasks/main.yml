@@ -1,0 +1,63 @@
+---
+
+- name: (User|{{ user }}) Get home directory 
+  shell: >
+    egrep "^{{ user }}:" /etc/passwd | awk -F: '{ print $6 }'
+  changed_when: false
+  register: user_home
+
+- name: (User|{{ user }}) Create ~/.Xresources file
+  copy:
+    src: "Xresources"
+    dest: "{{ user_home.stdout }}/.Xresources"
+    mode: 0644
+  become: true
+  become_user: "{{ user }}"
+
+- name: (User|{{ user }}) Create ~/.tmux.conf
+  copy:
+    src: "tmux.conf"
+    dest: "{{ user_home.stdout }}/.tmux.conf"
+    mode: 0644
+  become: true
+  become_user: "{{ user }}"
+
+- name: (user|{{ user }}) Create dir ~/.config
+  file:
+    path: "{{ user_home.stdout }}/.config"
+    mode: 0700
+    state: directory
+  become: true
+  become_user: "{{ user }}"
+
+- name: (user|{{ user }}) Create dir ~/.config/i3
+  file:
+    path: "{{ user_home.stdout }}/.config/i3"
+    mode: 0755
+    state: directory
+  become: true
+  become_user: "{{ user }}"
+
+- name: (User|{{ user }}) Create ~/.config/i3/config
+  copy:
+    src: "i3.config"
+    dest: "{{ user_home.stdout }}/.config/i3/config"
+    mode: 0644
+  become: true
+  become_user: "{{ user }}"
+
+- name: (User|{{ user }}) Create ~/.vimrc
+  copy:
+    src: "vimrc"
+    dest: "{{ user_home.stdout }}/.vimrc"
+    mode: 0644
+  become: true
+  become_user: "{{ user }}"
+
+- name: (User|{{ user }}) Create ~/.themes
+  copy:
+    src: "themes"
+    dest: "{{ user_home.stdout }}/.themes"
+    mode: 0755
+  become: true
+  become_user: "{{ user }}"

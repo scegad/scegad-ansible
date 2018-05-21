@@ -4,6 +4,8 @@
   roles:
     - dev_tools
     - { role: offline_host, when: hw_type == 'laptop' }
-    - desktop_env
     - { role: laptop, when: hw_type == 'laptop' }
     - qemu_libvirt
+    - desktop_env
+    - { role: desktop_user, user: 'adrian' }
+
