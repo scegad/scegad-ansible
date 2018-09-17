@@ -1,0 +1,31 @@
+---
+
+- hosts: control_hosts 
+  tasks:
+  - name: Get ansiblerun_data_path value
+    debug:
+      var: ansible_data_path
+
+  - name: Create ansible_data_path directory
+    file:
+      path: "{{ ansible_data_path }}"
+      state: directory
+      mode: 0755
+
+  - name: Create ansiblerun_data_path/keys directory
+    file:
+      path: "{{ ansible_data_path }}/keys"
+      state: directory
+      mode: 0700
+
+  - name: Update control keys
+    copy:
+      dest: "{{ ansible_data_path }}/keys/{{ item.name }}"
+      content: "{{ item.private_b64 | b64decode }}"
+      owner: "{{ ansible_env.USER }}"
+      mode: 0600
+    loop: "{{ control_keys }}"
+    loop_control:
+      label: "{{ item.name }}"
+    when: item.active == True
+ 

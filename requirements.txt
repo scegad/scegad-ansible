@@ -1,2 +1,10 @@
+# Important.
 ansible
+
+# Installing cryptography module should speed up vault operations
+# See: https://docs.ansible.com/ansible/latest/user_guide/vault.html#speeding-up-vault-operations
+cryptography
+
+# Use pexpect to load ssh keys into agent
+pexpect
 

@@ -1,0 +1,4 @@
+---
+
+control_keys: "{{ vault_control_keys }}"
+

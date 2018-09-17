@@ -1,0 +1,12 @@
+---
+# file: group_vars/all/vars
+
+ansible_user: "ansible"
+ansible_svc_user: "ansible"
+ansible_data_path: "{{ ansible_env.HOME }}/.ansible}}"
+
+
+control_public_keys:
+- name: scegad_control_20180915 
+  data: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDQaTfnyXE2w2wYsexiGORWnEY1DVirF5kTcNitRK1BOc7t8RudG1nA/dNh9weZnPFe/4rRjVUyMARpfFNCz+nUmRNHP+E/DljDOHgzKS/SV9TjQVXh694MHnKXa62pcKEcjxxLO2WTg0XuF0CZKx6Hdfap3CQ21CGn4TtFuNwcSNa4KM2BxECqcyG6ySpwO1rsXWFbLnKKBU3GJuuBNSfbrN0Gz93TYqiHNURScMaancVeZ/FL8cCz+hlAbnx933kt0dyafmEaz1HgR/G9bHGwxQmODP4VUSEswauFiLzDrIlbulEGmJGN+4qiRFajuXmUeXOa0xU4xUdZXXCjPXTB scegad_control_20180915
+

@@ -1,0 +1,54 @@
+---
+
+# Create/update service account on target host that ansible control node can use to manage it
+#
+# In cases where this is running non-interactively, updating an existing service account,
+# ansible_svc_user may be equal to ansible_user, i.e. ansible-playbook may be executing
+# as user "ansible" on the control node, and also be connecting to the target node as
+# user "ansible".
+#
+# Similarly, when initializing a host that has a pre-existing "ansible" svc account created on it,
+# as might be the case for a host built from a golden image, the two values may be the same.
+#
+# However, when initializing a host that has no pre-existing service account (e.g. "ansible"),
+# it may be necessary to SSH to that host using another account (such as an individual admin user
+# account) and use sudo to create the service account. In that case, ansible_user would be set to
+# the username of the individual admin user, and ansible_svc_user would be set to the name
+# of the service account to be created on the target host (e.g.: "ansible").
+#
+
+
+- hosts: all
+  tasks:
+  - name: Add group
+    group:
+      name: "{{ ansible_svc_user }}"
+    become: true
+
+  - name: Add Ansible user
+    user:
+      name: "{{ ansible_svc_user }}"
+      groups: "{{ ansible_svc_user }}"
+      password: ""
+      shell: "/bin/bash"
+      append: yes
+      comment: "Ansible user"
+      state: present
+    become: true
+
+  - name: add ssh authorized_keys for ansible_svc_user
+    authorized_key:
+      user: "{{ ansible_svc_user }}"
+      key: "{{ item.data }}"
+      state: present
+    loop: "{{ control_public_keys }}"
+    become: true
+
+  - name: nopasswd sudo for ansible_svc_user
+    lineinfile:
+      dest: /etc/sudoers
+      state: present
+      regexp: '^{{ ansible_svc_user }}'
+      line: '{{ ansible_svc_user }} ALL=(ALL) NOPASSWD: ALL'
+    become: true
+

@@ -1,0 +1,194 @@
+#!/usr/bin/env python
+
+import argparse
+import os
+import pexpect
+import subprocess 
+import yaml
+
+def get_vault_ids():
+  """ At a minimum, we need to open the group_vars/control_hosts vault to get the control keys,
+      so we need at least one vault passphrase. We'll expect one of Ansible's relevant environment
+      variables to be set, and alert the user if we don't find them."""
+  
+  if ("ANSIBLE_VAULT_IDENTITY_LIST" in os.environ) or \
+    ("ANSIBLE_VAULT_PASSWORD_FILE" in os.environ):
+    print("Using vault ID info from environment\n")
+    print("ANSIBLE_VAULT_IDENTITY_LIST: " + \
+      str(os.environ.get('ANSIBLE_VAULT_IDENTITY_LIST')) + '\n')
+    print("ANSIBLE_VAULT_PASSWORD_FILE: " + \
+      str(os.environ.get('ANSIBLE_VAULT_PASSWORD_FILE')) + '\n')
+  else:
+    print("\nError: No vault ID info found in environment.\n")
+    print("Please define ANSIBLE_VAULT_IDENTITY_LIST. Example:\n")
+    print('  export ANSIBLE_VAULT_IDENTITY_LIST="@$HOME/.ansible/vault_secret.txt,@prompt"\n')
+    exit(1)
+
+def init_control(inventory_path, data_path):
+  """Initialize the current account as an Ansible control account.
+  Assumptions:
+    * inventory/group_vars/control_hosts/vault.yml contains dict with control private key data
+    * passphrase for control_hosts vault is available via environment
+      * see get_vault_ids() for additional detail"""
+
+  # Run _init_control.yml playbook, limited to localhost, as current user
+  apb_args = [
+    "--connection=local",
+    "--inventory=" + inventory_path,
+    "playbooks/_init_control.yml",
+    "--limit=localhost",
+    '--extra-vars',
+    'ansible_data_path=' + data_path 
+  ]
+  subprocess.call(['ansible-playbook'] + apb_args)
+
+def load_keys(inventory_path, data_path):
+  """Load Ansible control SSH private keys from $ANSIBLE_DATA/keys into SSH agent.
+  Assumptions:
+    * SSH Agent is already running and PID is in SSH_AGENT_PID.
+    * Dict with key data is available in inventory/group_vars/control_hosts/vault.yml
+    * Passphrase info for vault was available in environment (see get_vault_ids())"""
+
+  vault_yaml = subprocess.check_output([
+    "ansible-vault",
+    "view",
+    "inventory/group_vars/control_hosts/vault.yml"
+  ])
+  
+  vault_dict = yaml.load(vault_yaml)
+  key_load_results = {} 
+
+  for key in vault_dict['vault_control_keys']:
+    print("Key: " + key['name'] + " Active: " + str(key['active']))
+    # Use pexpect to add the key using ssh-add
+    child = pexpect.spawn('ssh-add ' + data_path + '/keys/' + key['name'])
+    child.expect(':')
+    child.sendline(key['passphrase'])
+    child.expect('(Identity added:.*\n$)|(Bad passphrase.*:)')
+    result = str(child.after)
+    key_load_results[key['name']] = True if "Identity added" in result else False 
+  print("Key load results: \n" + str(key_load_results))
+
+def init_host(inventory_path, limit_spec, remote_user, ask_remote_pass, ask_become_pass, svc_username):
+
+  apb_args = [
+    "--inventory=" + inventory_path,
+    "playbooks/_init_host.yml",
+    "--extra-vars", "ansible_user=" + remote_user + " ansible_svc_user=" + svc_username 
+  ]
+
+  if limit_spec:
+    apb_args.append("--limit=" + limit_spec)
+  else:
+    apb_args.append("--limit=localhost")
+
+  if ask_remote_pass:
+    apb_args.append("--ask-pass") 
+
+  if ask_become_pass:
+    apb_args.append("--ask-become-pass")
+
+  subprocess.call(['ansible-playbook'] + apb_args)
+  
+def start(inventory_path, data_path, svc_username, limit_spec):
+  """Execute site.yml (full ansible run) limited to tags/hosts specified in limit_spec."""
+  print("In start")
+  # Run site.yml playbook as svc_username, limiting to limitspec
+  apb_args = [
+    "--inventory=" + inventory_path,
+    "site.yml",
+    "--extra-vars", "ansible_user=" + svc_username + " ansible_svc_user=" + svc_username + " ansible_data_path=" + data_path
+  ]
+
+  if limit_spec:
+    apb_args.append("--limit=" + limit_spec)
+
+  subprocess.call(['ansible-playbook'] + apb_args)
+
+def main():
+  parser = argparse.ArgumentParser()
+  parser.add_argument(
+    "mode",
+    choices=['initcontrol', 'loadkeys', 'inithost', 'start'],
+    help="Mode of operation"
+  )  
+ 
+  parser.add_argument(
+    "--data-path",
+    "-d",
+    default=os.environ['HOME'] + "/.ansible",
+    help="Absolute path of directory where ansible-run will keep key and config data. \
+          Default: $HOME/.ansible"
+  )
+
+  parser.add_argument(
+    "--inventory",
+    "-i",
+    default="inventory/staging",
+    help="Path to inventory file. \
+          Default: ./inventory/staging"
+  )
+
+  parser.add_argument(
+    "--limit-spec",
+    "-l",
+    default=None,
+    help="Inventory hostname of host to connect to for host_init. \
+          Default: None for mode start; localhost for mode inithost"
+  )
+
+  parser.add_argument(
+    "--remote-user",
+    "-u",
+    default=os.environ['USER'],
+    help="The username SSH should use when performing host_init. \
+          Default: $USER"
+  )
+
+  parser.add_argument(
+    "--ask-remote-pass",
+    "-p",
+    action='store_true',
+    help="Prompt for SSH password to use when performing host_init. \
+          Default: Don\'t prompt (use key auth only)." 
+  )
+
+  parser.add_argument(
+    "--ask-become-pass",
+    "-b",
+    action='store_true',
+    help="Prompt for Become password to use when performing host_init. \
+          Default: Don\'t use Become pass (assumes password-less sudoers on target)."
+
+  )
+
+  parser.add_argument(
+    "--svc-username",
+    "-s",
+    default="ansible",
+    help="The username of the service account that ansible should create \
+          on the target host during host init, and that ansible should act as \
+          during execution. \
+          Default: ansible"
+  )
+
+  args = parser.parse_args()
+  
+  print("[ansible-run] Using data path: " + args.data_path) 
+  get_vault_ids()
+
+  if args.mode == 'initcontrol':
+    init_control(args.inventory, args.data_path)
+  elif args.mode == 'loadkeys':
+    load_keys(args.inventory, args.data_path)
+  elif args.mode == 'inithost':
+    init_host(args.inventory, args.limit_spec, args.remote_user,
+      args.ask_remote_pass, args.ask_become_pass, args.svc_username)
+  else:
+    start(args.inventory, args.data_path, args.svc_username, args.limit_spec)
+
+if __name__ == '__main__':
+
+
+  main()
+
